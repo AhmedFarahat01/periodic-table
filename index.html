@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدول الدوري والتفاعلي المكتمل - 118 عنصر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161f30;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            
+            /* Category Colors */
+            --col-alkali: #ff4757;
+            --col-alkaline: #ffa502;
+            --col-transition: #eccc68;
+            --col-post-trans: #70a1ff;
+            --col-metalloid: #2ed573;
+            --col-nonmetal: #1e90ff;
+            --col-halogen: #a55eea;
+            --col-noble: #ff6b81;
+            --col-lanthanide: #ff7f50;
+            --col-actinide: #ff6348;
+            --col-superheavy: #747d8c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* حاوية المحتوى الرئيسي للتحكم في تأثير الضبابية */
+        .main-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: filter 0.4s ease;
+        }
+
+        .main-content.blurred {
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+        }
+
+        header p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        /* Table Container & Layout */
+        .table-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            /* Keep the wide table reachable from both sides on RTL pages. */
+            direction: ltr;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x pan-y;
+        }
+
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(62px, 1fr));
+            grid-template-rows: repeat(12, minmax(58px, 1fr));
+            gap: 5px;
+            min-width: 1150px;
+            margin: 0 auto;
+        }
+
+        /* Group Headers Style */
+        .group-header-num {
+            grid-row: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .group-header-sub {
+            grid-row: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .group-header-viii {
+            grid-row: 2;
+            grid-column: 8 / span 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Element Cards */
+        .element-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .element-card:hover {
+            transform: scale(1.15);
+            z-index: 100;
+            border-color: #fff;
+            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.4);
+        }
+
+        .element-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.62rem;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .element-symbol {
+            font-size: 1.2rem;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.1;
+            margin: 2px 0;
+        }
+
+        .element-name {
+            font-size: 0.6rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-main);
+        }
+
+        /* Category Color Border */
+        .alkali { border-top: 4px solid var(--col-alkali); }
+        .alkaline { border-top: 4px solid var(--col-alkaline); }
+        .transition { border-top: 4px solid var(--col-transition); }
+        .post-trans { border-top: 4px solid var(--col-post-trans); }
+        .metalloid { border-top: 4px solid var(--col-metalloid); }
+        .nonmetal { border-top: 4px solid var(--col-nonmetal); }
+        .halogen { border-top: 4px solid var(--col-halogen); }
+        .noble { border-top: 4px solid var(--col-noble); }
+        .lanthanide { border-top: 4px solid var(--col-lanthanide); }
+        .actinide { border-top: 4px solid var(--col-actinide); }
+        .superheavy { border-top: 4px solid var(--col-superheavy); }
+
+        /* Empty Spacers */
+        .spacer {
+            pointer-events: none;
+            background: none;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+        }
+
+        .label-row {
+            grid-column: 2 / span 2;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+            padding-left: 10px;
+        }
+
+        /* Standard periodic-table structure: axes + 18 × 7 main grid + detached series. */
+        .periodic-table {
+            grid-template-columns: 26px minmax(0, 1fr);
+            grid-template-rows: 24px auto auto;
+            gap: 5px;
+            direction: ltr;
+        }
+
+        .group-axis,
+        .main-grid,
+        .series-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(62px, 1fr));
+            gap: 5px;
+        }
+
+        .group-axis { grid-column: 2; }
+
+        .main-table {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 26px minmax(0, 1fr);
+            gap: 5px;
+        }
+
+        .period-axis {
+            display: grid;
+            grid-template-rows: repeat(7, minmax(62px, 1fr));
+            gap: 5px;
+        }
+
+        .main-grid {
+            grid-template-rows: repeat(7, minmax(62px, 1fr));
+        }
+
+        .series-table {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 26px minmax(0, 1fr);
+            gap: 5px;
+            margin-top: 12px;
+        }
+
+        .series-labels {
+            display: grid;
+            grid-template-rows: repeat(2, minmax(62px, 1fr));
+            gap: 5px;
+        }
+
+        .series-grid { grid-template-rows: repeat(2, minmax(62px, 1fr)); }
+
+        .period-header-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .series-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 0.7rem;
+            font-weight: 700;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        .series-reference {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .element-card {
+            padding: 4px 6px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            align-items: center;
+        }
+
+        /* Keep the two values on separate sides of the chemical symbol. */
+        .element-number,
+        .element-mass {
+            direction: ltr;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .element-number {
+            align-self: start;
+            color: var(--accent-cyan);
+            font-size: 0.58rem;
+            font-weight: 700;
+        }
+
+        .element-mass {
+            align-self: end;
+            color: var(--text-sub);
+            font-size: 0.5rem;
+        }
+
+        .element-symbol {
+            align-self: center;
+            font-size: 1.35rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .element-name { display: none; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Info Display Section (Modal Content) */
+        .info-panel {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(145deg, #131b2e, #1a263d);
+            border: 1px solid rgba(0, 242, 254, 0.5);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 25px;
+            align-items: center;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .info-panel {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px; /* RTL layout */
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+            border: 1px solid #ff4757;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: #ff4757;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .info-preview-box {
+            background: rgba(11, 15, 25, 0.8);
+            border-radius: 12px;
+            border: 2px solid var(--accent-cyan);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.1);
+            height: 100%;
+        }
+
+        .preview-number {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .preview-mass {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+        }
+
+        .preview-symbol {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 15px 0 5px;
+            background: linear-gradient(180deg, #fff, var(--text-sub));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .preview-name-ar {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .preview-name-en {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+        }
+
+        .info-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .detail-label {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .val-category {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .category-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .legend-item:hover { color: #fff; }
+        .legend-color { width: 14px; height: 14px; border-radius: 50%; }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-bottom: 15px;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 768px) {
+            .table-wrapper {
+                /* Force a visible, touch-friendly horizontal scroll area. */
+                overflow-x: scroll;
+                padding-bottom: 14px;
+                scrollbar-width: thin;
+            }
+
+            .info-panel {
+                grid-template-columns: 1fr;
+            }
+            .info-preview-box {
+                padding: 15px;
+            }
+            .preview-symbol { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-content" id="mainContainer">
+    <header>
+        <h1>الجدول الدوري للعناصر الكيميائية</h1>
+        <p>انقر على العنصر لعرض تفاصيله الكاملة</p>
+    </header>
+
+    <div class="table-wrapper">
+        <div class="periodic-table" id="periodicTable">
+            <div class="group-axis" id="groupAxis" aria-label="Group numbers"></div>
+            <div class="main-table">
+                <div class="period-axis" id="periodAxis" aria-label="Period numbers"></div>
+                <div class="main-grid" id="mainGrid" aria-label="Main periodic table"></div>
+            </div>
+            <div class="series-table">
+                <div class="series-labels">
+                    <div class="series-label">Lanthanides</div>
+                    <div class="series-label">Actinides</div>
+                </div>
+                <div class="series-grid" id="seriesGrid" aria-label="Lanthanide and actinide series"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-legend">
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-alkali)"></div> Alkali Metal</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-alkaline)"></div> Alkaline Earth</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-transition)"></div> Transition Metal</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-post-trans)"></div> Basic Metal</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-metalloid)"></div> Semimetal</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-nonmetal)"></div> Nonmetal</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-halogen)"></div> Halogen</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-noble)"></div> Noble Gas</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-lanthanide)"></div> Lanthanide</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--col-actinide)"></div> Actinide</div>
+    </div>
+    
+    <footer>افهم ثم احفظ مع أ. أحمد فرحات</footer>
+</div>
+
+<!-- Modal Overlay for Element Info -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="info-panel" id="infoPanel">
+        <button class="close-btn" id="closeBtn" title="إغلاق">&times;</button>
+        
+        <!-- معاينة العنصر البصرية -->
+        <div class="info-preview-box" id="pBox">
+            <div class="preview-number" id="pNumber">--</div>
+            <div class="preview-mass" id="pMass">--</div>
+            <div class="preview-symbol" id="pSymbol">--</div>
+            <div class="preview-name-ar" id="pNameAr">حدد عنصراً</div>
+            <div class="preview-name-en" id="pNameEn">Select an element</div>
+        </div>
+
+        <!-- التفاصيل الكيميائية -->
+        <div class="info-details-grid">
+            <div class="detail-card">
+                <div class="detail-label">التصنيف الكيميائي</div>
+                <div class="detail-value"><span class="val-category" id="pCategory">--</span></div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">التوزيع الإلكتروني</div>
+                <div class="detail-value" id="pConfig" style="direction: ltr; text-align: right;">--</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">الحالة عند 20°C</div>
+                <div class="detail-value" id="pState">--</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">السالبية الكهربية</div>
+                <div class="detail-value" id="pElectro">--</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">سنة الاكتشاف</div>
+                <div class="detail-value" id="pYear">--</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">نصف القطر الذري (pm)</div>
+                <div class="detail-value" id="pRadius">--</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // قاعدة بيانات العناصر (كاملة 118 عنصر مع إحداثيات الصفوف الجديدة بعد إضافة ترويسة المجموعات)
+    const elementsData = [
+        { n:1, s:'H', ar:'هيدروجين', en:'Hydrogen', m:'1.008', c:'nonmetal', col:'var(--col-nonmetal)', row:3, col_g:1, conf:'1s1', state:'غاز', elec:'2.20', year:'1766', rad:'53' },
+        { n:2, s:'He', ar:'هيليوم', en:'Helium', m:'4.0026', c:'noble', col:'var(--col-noble)', row:3, col_g:18, conf:'1s2', state:'غاز', elec:'-', year:'1868', rad:'31' },
+        { n:3, s:'Li', ar:'ليثيوم', en:'Lithium', m:'6.94', c:'alkali', col:'var(--col-alkali)', row:4, col_g:1, conf:'[He] 2s1', state:'صلب', elec:'0.98', year:'1817', rad:'167' },
+        { n:4, s:'Be', ar:'بيريليوم', en:'Beryllium', m:'9.0122', c:'alkaline', col:'var(--col-alkaline)', row:4, col_g:2, conf:'[He] 2s2', state:'صلب', elec:'1.57', year:'1798', rad:'112' },
+        { n:5, s:'B', ar:'بورون', en:'Boron', m:'10.81', c:'metalloid', col:'var(--col-metalloid)', row:4, col_g:13, conf:'[He] 2s2 2p1', state:'صلب', elec:'2.04', year:'1808', rad:'87' },
+        { n:6, s:'C', ar:'كربون', en:'Carbon', m:'12.011', c:'nonmetal', col:'var(--col-nonmetal)', row:4, col_g:14, conf:'[He] 2s2 2p2', state:'صلب', elec:'2.55', year:'قديم', rad:'67' },
+        { n:7, s:'N', ar:'نيتروجين', en:'Nitrogen', m:'14.007', c:'nonmetal', col:'var(--col-nonmetal)', row:4, col_g:15, conf:'[He] 2s2 2p3', state:'غاز', elec:'3.04', year:'1772', rad:'56' },
+        { n:8, s:'O', ar:'أكسجين', en:'Oxygen', m:'15.999', c:'nonmetal', col:'var(--col-nonmetal)', row:4, col_g:16, conf:'[He] 2s2 2p4', state:'غاز', elec:'3.44', year:'1774', rad:'48' },
+        { n:9, s:'F', ar:'فلور', en:'Fluorine', m:'18.998', c:'halogen', col:'var(--col-halogen)', row:4, col_g:17, conf:'[He] 2s2 2p5', state:'غاز', elec:'3.98', year:'1886', rad:'42' },
+        { n:10, s:'Ne', ar:'نيون', en:'Neon', m:'20.180', c:'noble', col:'var(--col-noble)', row:4, col_g:18, conf:'[He] 2s2 2p6', state:'غاز', elec:'-', year:'1898', rad:'38' },
+        { n:11, s:'Na', ar:'صوديوم', en:'Sodium', m:'22.990', c:'alkali', col:'var(--col-alkali)', row:5, col_g:1, conf:'[Ne] 3s1', state:'صلب', elec:'0.93', year:'1807', rad:'190' },
+        { n:12, s:'Mg', ar:'مغنيسيوم', en:'Magnesium', m:'24.305', c:'alkaline', col:'var(--col-alkaline)', row:5, col_g:2, conf:'[Ne] 3s2', state:'صلب', elec:'1.31', year:'1755', rad:'145' },
+        { n:13, s:'Al', ar:'ألومنيوم', en:'Aluminium', m:'26.982', c:'post-trans', col:'var(--col-post-trans)', row:5, col_g:13, conf:'[Ne] 3s2 3p1', state:'صلب', elec:'1.61', year:'1825', rad:'118' },
+        { n:14, s:'Si', ar:'سيليكون', en:'Silicon', m:'28.085', c:'metalloid', col:'var(--col-metalloid)', row:5, col_g:14, conf:'[Ne] 3s2 3p2', state:'صلب', elec:'1.90', year:'1824', rad:'111' },
+        { n:15, s:'P', ar:'فوسفور', en:'Phosphorus', m:'30.974', c:'nonmetal', col:'var(--col-nonmetal)', row:5, col_g:15, conf:'[Ne] 3s2 3p3', state:'صلب', elec:'2.19', year:'1669', rad:'98' },
+        { n:16, s:'S', ar:'كبريت', en:'Sulfur', m:'32.06', c:'nonmetal', col:'var(--col-nonmetal)', row:5, col_g:16, conf:'[Ne] 3s2 3p4', state:'صلب', elec:'2.58', year:'قديم', rad:'88' },
+        { n:17, s:'Cl', ar:'كلور', en:'Chlorine', m:'35.45', c:'halogen', col:'var(--col-halogen)', row:5, col_g:17, conf:'[Ne] 3s2 3p5', state:'غاز', elec:'3.16', year:'1774', rad:'79' },
+        { n:18, s:'Ar', ar:'أرجون', en:'Argon', m:'39.948', c:'noble', col:'var(--col-noble)', row:5, col_g:18, conf:'[Ne] 3s2 3p6', state:'غاز', elec:'-', year:'1894', rad:'71' },
+        { n:19, s:'K', ar:'بوتاسيوم', en:'Potassium', m:'39.098', c:'alkali', col:'var(--col-alkali)', row:6, col_g:1, conf:'[Ar] 4s1', state:'صلب', elec:'0.82', year:'1807', rad:'243' },
+        { n:20, s:'Ca', ar:'كالسيوم', en:'Calcium', m:'40.078', c:'alkaline', col:'var(--col-alkaline)', row:6, col_g:2, conf:'[Ar] 4s2', state:'صلب', elec:'1.00', year:'1808', rad:'194' },
+        { n:21, s:'Sc', ar:'سكانديوم', en:'Scandium', m:'44.956', c:'transition', col:'var(--col-transition)', row:6, col_g:3, conf:'[Ar] 3d1 4s2', state:'صلب', elec:'1.36', year:'1879', rad:'162' },
+        { n:22, s:'Ti', ar:'تيتانيوم', en:'Titanium', m:'47.867', c:'transition', col:'var(--col-transition)', row:6, col_g:4, conf:'[Ar] 3d2 4s2', state:'صلب', elec:'1.54', year:'1791', rad:'147' },
+        { n:23, s:'V', ar:'فاناديوم', en:'Vanadium', m:'50.942', c:'transition', col:'var(--col-transition)', row:6, col_g:5, conf:'[Ar] 3d3 4s2', state:'صلب', elec:'1.63', year:'1801', rad:'134' },
+        { n:24, s:'Cr', ar:'كروم', en:'Chromium', m:'51.996', c:'transition', col:'var(--col-transition)', row:6, col_g:6, conf:'[Ar] 3d5 4s1', state:'صلب', elec:'1.66', year:'1797', rad:'128' },
+        { n:25, s:'Mn', ar:'منغنيز', en:'Manganese', m:'54.938', c:'transition', col:'var(--col-transition)', row:6, col_g:7, conf:'[Ar] 3d5 4s2', state:'صلب', elec:'1.55', year:'1774', rad:'127' },
+        { n:26, s:'Fe', ar:'حديد', en:'Iron', m:'55.845', c:'transition', col:'var(--col-transition)', row:6, col_g:8, conf:'[Ar] 3d6 4s2', state:'صلب', elec:'1.83', year:'قديم', rad:'126' },
+        { n:27, s:'Co', ar:'كوبالت', en:'Cobalt', m:'58.933', c:'transition', col:'var(--col-transition)', row:6, col_g:9, conf:'[Ar] 3d7 4s2', state:'صلب', elec:'1.88', year:'1735', rad:'125' },
+        { n:28, s:'Ni', ar:'نيكل', en:'Nickel', m:'58.693', c:'transition', col:'var(--col-transition)', row:6, col_g:10, conf:'[Ar] 3d8 4s2', state:'صلب', elec:'1.91', year:'1751', rad:'124' },
+        { n:29, s:'Cu', ar:'نحاس', en:'Copper', m:'63.546', c:'transition', col:'var(--col-transition)', row:6, col_g:11, conf:'[Ar] 3d10 4s1', state:'صلب', elec:'1.90', year:'قديم', rad:'128' },
+        { n:30, s:'Zn', ar:'زنك', en:'Zinc', m:'65.38', c:'transition', col:'var(--col-transition)', row:6, col_g:12, conf:'[Ar] 3d10 4s2', state:'صلب', elec:'1.65', year:'قديم', rad:'134' },
+        { n:31, s:'Ga', ar:'غاليوم', en:'Gallium', m:'69.723', c:'post-trans', col:'var(--col-post-trans)', row:6, col_g:13, conf:'[Ar] 3d10 4s2 4p1', state:'صلب', elec:'1.81', year:'1875', rad:'135' },
+        { n:32, s:'Ge', ar:'جرمانيوم', en:'Germanium', m:'72.630', c:'metalloid', col:'var(--col-metalloid)', row:6, col_g:14, conf:'[Ar] 3d10 4s2 4p2', state:'صلب', elec:'2.01', year:'1886', rad:'122' },
+        { n:33, s:'As', ar:'زرنيخ', en:'Arsenic', m:'74.922', c:'metalloid', col:'var(--col-metalloid)', row:6, col_g:15, conf:'[Ar] 3d10 4s2 4p3', state:'صلب', elec:'2.18', year:'قديم', rad:'119' },
+        { n:34, s:'Se', ar:'سيلينيوم', en:'Selenium', m:'78.971', c:'nonmetal', col:'var(--col-nonmetal)', row:6, col_g:16, conf:'[Ar] 3d10 4s2 4p4', state:'صلب', elec:'2.55', year:'1817', rad:'120' },
+        { n:35, s:'Br', ar:'بروم', en:'Bromine', m:'79.904', c:'halogen', col:'var(--col-halogen)', row:6, col_g:17, conf:'[Ar] 3d10 4s2 4p5', state:'سائل', elec:'2.96', year:'1826', rad:'114' },
+        { n:36, s:'Kr', ar:'كريبتون', en:'Krypton', m:'83.798', c:'noble', col:'var(--col-noble)', row:6, col_g:18, conf:'[Ar] 3d10 4s2 4p6', state:'غاز', elec:'3.00', year:'1898', rad:'105' },
+        { n:37, s:'Rb', ar:'روبيديوم', en:'Rubidium', m:'85.468', c:'alkali', col:'var(--col-alkali)', row:7, col_g:1, conf:'[Kr] 5s1', state:'صلب', elec:'0.82', year:'1861', rad:'248' },
+        { n:38, s:'Sr', ar:'سترونشيوم', en:'Strontium', m:'87.62', c:'alkaline', col:'var(--col-alkaline)', row:7, col_g:2, conf:'[Kr] 5s2', state:'صلب', elec:'0.95', year:'1790', rad:'215' },
+        { n:39, s:'Y', ar:'إتريوم', en:'Yttrium', m:'88.906', c:'transition', col:'var(--col-transition)', row:7, col_g:3, conf:'[Kr] 4d1 5s2', state:'صلب', elec:'1.22', year:'1794', rad:'180' },
+        { n:40, s:'Zr', ar:'زركونيوم', en:'Zirconium', m:'91.224', c:'transition', col:'var(--col-transition)', row:7, col_g:4, conf:'[Kr] 4d2 5s2', state:'صلب', elec:'1.33', year:'1789', rad:'160' },
+        { n:41, s:'Nb', ar:'نيوبيوم', en:'Niobium', m:'92.906', c:'transition', col:'var(--col-transition)', row:7, col_g:5, conf:'[Kr] 4d4 5s1', state:'صلب', elec:'1.6', year:'1801', rad:'146' },
+        { n:42, s:'Mo', ar:'موليبدينوم', en:'Molybdenum', m:'95.95', c:'transition', col:'var(--col-transition)', row:7, col_g:6, conf:'[Kr] 4d5 5s1', state:'صلب', elec:'2.16', year:'1778', rad:'139' },
+        { n:43, s:'Tc', ar:'تكنيشيوم', en:'Technetium', m:'[98]', c:'transition', col:'var(--col-transition)', row:7, col_g:7, conf:'[Kr] 4d5 5s2', state:'صلب', elec:'1.9', year:'1937', rad:'136' },
+        { n:44, s:'Ru', ar:'روثينيوم', en:'Ruthenium', m:'101.07', c:'transition', col:'var(--col-transition)', row:7, col_g:8, conf:'[Kr] 4d7 5s1', state:'صلب', elec:'2.2', year:'1844', rad:'134' },
+        { n:45, s:'Rh', ar:'روديوم', en:'Rhodium', m:'102.91', c:'transition', col:'var(--col-transition)', row:7, col_g:9, conf:'[Kr] 4d8 5s1', state:'صلب', elec:'2.28', year:'1803', rad:'134' },
+        { n:46, s:'Pd', ar:'بالاديوم', en:'Palladium', m:'106.42', c:'transition', col:'var(--col-transition)', row:7, col_g:10, conf:'[Kr] 4d10', state:'صلب', elec:'2.20', year:'1803', rad:'137' },
+        { n:47, s:'Ag', ar:'فضة', en:'Silver', m:'107.87', c:'transition', col:'var(--col-transition)', row:7, col_g:11, conf:'[Kr] 4d10 5s1', state:'صلب', elec:'1.93', year:'قديم', rad:'144' },
+        { n:48, s:'Cd', ar:'كادميوم', en:'Cadmium', m:'112.41', c:'transition', col:'var(--col-transition)', row:7, col_g:12, conf:'[Kr] 4d10 5s2', state:'صلب', elec:'1.69', year:'1817', rad:'151' },
+        { n:49, s:'In', ar:'إنديوم', en:'Indium', m:'114.82', c:'post-trans', col:'var(--col-post-trans)', row:7, col_g:13, conf:'[Kr] 4d10 5s2 5p1', state:'صلب', elec:'1.78', year:'1863', rad:'167' },
+        { n:50, s:'Sn', ar:'قصدير', en:'Tin', m:'118.71', c:'post-trans', col:'var(--col-post-trans)', row:7, col_g:14, conf:'[Kr] 4d10 5s2 5p2', state:'صلب', elec:'1.96', year:'قديم', rad:'140' },
+        { n:51, s:'Sb', ar:'إثمد', en:'Antimony', m:'121.76', c:'metalloid', col:'var(--col-metalloid)', row:7, col_g:15, conf:'[Kr] 4d10 5s2 5p3', state:'صلب', elec:'2.05', year:'قديم', rad:'140' },
+        { n:52, s:'Te', ar:'تيلوريوم', en:'Tellurium', m:'127.60', c:'metalloid', col:'var(--col-metalloid)', row:7, col_g:16, conf:'[Kr] 4d10 5s2 5p4', state:'صلب', elec:'2.1', year:'1782', rad:'142' },
+        { n:53, s:'I', ar:'يود', en:'Iodine', m:'126.90', c:'halogen', col:'var(--col-halogen)', row:7, col_g:17, conf:'[Kr] 4d10 5s2 5p5', state:'صلب', elec:'2.66', year:'1811', rad:'133' },
+        { n:54, s:'Xe', ar:'زينون', en:'Xenon', m:'131.29', c:'noble', col:'var(--col-noble)', row:7, col_g:18, conf:'[Kr] 4d10 5s2 5p6', state:'غاز', elec:'2.6', year:'1898', rad:'130' },
+        { n:55, s:'Cs', ar:'سيزيوم', en:'Caesium', m:'132.91', c:'alkali', col:'var(--col-alkali)', row:8, col_g:1, conf:'[Xe] 6s1', state:'صلب', elec:'0.79', year:'1860', rad:'265' },
+        { n:56, s:'Ba', ar:'باريوم', en:'Barium', m:'137.33', c:'alkaline', col:'var(--col-alkaline)', row:8, col_g:2, conf:'[Xe] 6s2', state:'صلب', elec:'0.89', year:'1808', rad:'222' },
+        
+        { n:72, s:'Hf', ar:'هافنيوم', en:'Hafnium', m:'178.49', c:'transition', col:'var(--col-transition)', row:8, col_g:4, conf:'[Xe] 4f14 5d2 6s2', state:'صلب', elec:'1.3', year:'1923', rad:'159' },
+        { n:73, s:'Ta', ar:'تانتالوم', en:'Tantalum', m:'180.95', c:'transition', col:'var(--col-transition)', row:8, col_g:5, conf:'[Xe] 4f14 5d3 6s2', state:'صلب', elec:'1.5', year:'1802', rad:'146' },
+        { n:74, s:'W', ar:'تنجستن', en:'Tungsten', m:'183.84', c:'transition', col:'var(--col-transition)', row:8, col_g:6, conf:'[Xe] 4f14 5d4 6s2', state:'صلب', elec:'2.36', year:'1783', rad:'139' },
+        { n:75, s:'Re', ar:'رينيوم', en:'Rhenium', m:'186.21', c:'transition', col:'var(--col-transition)', row:8, col_g:7, conf:'[Xe] 4f14 5d5 6s2', state:'صلب', elec:'1.9', year:'1925', rad:'137' },
+        { n:76, s:'Os', ar:'أوزميوم', en:'Osmium', m:'190.23', c:'transition', col:'var(--col-transition)', row:8, col_g:8, conf:'[Xe] 4f14 5d6 6s2', state:'صلب', elec:'2.2', year:'1803', rad:'135' },
+        { n:77, s:'Ir', ar:'إريديوم', en:'Iridium', m:'192.22', c:'transition', col:'var(--col-transition)', row:8, col_g:9, conf:'[Xe] 4f14 5d7 6s2', state:'صلب', elec:'2.20', year:'1803', rad:'136' },
+        { n:78, s:'Pt', ar:'بلاتين', en:'Platinum', m:'195.08', c:'transition', col:'var(--col-transition)', row:8, col_g:10, conf:'[Xe] 4f14 5d9 6s1', state:'صلب', elec:'2.28', year:'1735', rad:'139' },
+        { n:79, s:'Au', ar:'ذهب', en:'Gold', m:'196.97', c:'transition', col:'var(--col-transition)', row:8, col_g:11, conf:'[Xe] 4f14 5d10 6s1', state:'صلب', elec:'2.54', year:'قديم', rad:'144' },
+        { n:80, s:'Hg', ar:'زئبق', en:'Mercury', m:'200.59', c:'transition', col:'var(--col-transition)', row:8, col_g:12, conf:'[Xe] 4f14 5d10 6s2', state:'سائل', elec:'2.00', year:'قديم', rad:'151' },
+        { n:81, s:'Tl', ar:'ثاليوم', en:'Thallium', m:'204.38', c:'post-trans', col:'var(--col-post-trans)', row:8, col_g:13, conf:'[Xe] 4f14 5d10 6s2 6p1', state:'صلب', elec:'1.62', year:'1861', rad:'170' },
+        { n:82, s:'Pb', ar:'رصاص', en:'Lead', m:'207.2', c:'post-trans', col:'var(--col-post-trans)', row:8, col_g:14, conf:'[Xe] 4f14 5d10 6s2 6p2', state:'صلب', elec:'2.33', year:'قديم', rad:'146' },
+        { n:83, s:'Bi', ar:'بزموت', en:'Bismuth', m:'208.98', c:'post-trans', col:'var(--col-post-trans)', row:8, col_g:15, conf:'[Xe] 4f14 5d10 6s2 6p3', state:'صلب', elec:'2.02', year:'قديم', rad:'150' },
+        { n:84, s:'Po', ar:'بولونيوم', en:'Polonium', m:'[209]', c:'post-trans', col:'var(--col-post-trans)', row:8, col_g:16, conf:'[Xe] 4f14 5d10 6s2 6p4', state:'صلب', elec:'2.0', year:'1898', rad:'168' },
+        { n:85, s:'At', ar:'أستاتين', en:'Astatine', m:'[210]', c:'metalloid', col:'var(--col-metalloid)', row:8, col_g:17, conf:'[Xe] 4f14 5d10 6s2 6p5', state:'صلب', elec:'2.2', year:'1940', rad:'140' },
+        { n:86, s:'Rn', ar:'رادون', en:'Radon', m:'[222]', c:'noble', col:'var(--col-noble)', row:8, col_g:18, conf:'[Xe] 4f14 5d10 6s2 6p6', state:'غاز', elec:'2.2', year:'1900', rad:'150' },
+        { n:87, s:'Fr', ar:'فرانسيوم', en:'Francium', m:'[223]', c:'alkali', col:'var(--col-alkali)', row:9, col_g:1, conf:'[Rn] 7s1', state:'صلب', elec:'0.7', year:'1939', rad:'260' },
+        { n:88, s:'Ra', ar:'راديوم', en:'Radium', m:'[226]', c:'alkaline', col:'var(--col-alkaline)', row:9, col_g:2, conf:'[Rn] 7s2', state:'صلب', elec:'0.9', year:'1898', rad:'215' },
+        
+        { n:104, s:'Rf', ar:'رذرفورديوم', en:'Rutherfordium', m:'[267]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:4, conf:'[Rn] 5f14 6d2 7s2', state:'غير معروف', elec:'-', year:'1964', rad:'-' },
+        { n:105, s:'Db', ar:'دوبنيوم', en:'Dubnium', m:'[270]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:5, conf:'[Rn] 5f14 6d3 7s2', state:'غير معروف', elec:'-', year:'1967', rad:'-' },
+        { n:106, s:'Sg', ar:'سيبورجيوم', en:'Seaborgium', m:'[271]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:6, conf:'[Rn] 5f14 6d4 7s2', state:'غير معروف', elec:'-', year:'1974', rad:'-' },
+        { n:107, s:'Bh', ar:'بوريوم', en:'Bohrium', m:'[270]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:7, conf:'[Rn] 5f14 6d5 7s2', state:'غير معروف', elec:'-', year:'1981', rad:'-' },
+        { n:108, s:'Hs', ar:'هاسيوم', en:'Hassium', m:'[277]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:8, conf:'[Rn] 5f14 6d6 7s2', state:'غير معروف', elec:'-', year:'1984', rad:'-' },
+        { n:109, s:'Mt', ar:'مايتنريوم', en:'Meitnerium', m:'[278]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:9, conf:'[Rn] 5f14 6d7 7s2', state:'غير معروف', elec:'-', year:'1982', rad:'-' },
+        { n:110, s:'Ds', ar:'دارمشتاتيوم', en:'Darmstadtium', m:'[281]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:10, conf:'[Rn] 5f14 6d8 7s2', state:'غير معروف', elec:'-', year:'1994', rad:'-' },
+        { n:111, s:'Rg', ar:'روينتجينيوم', en:'Roentgenium', m:'[282]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:11, conf:'[Rn] 5f14 6d9 7s2', state:'غير معروف', elec:'-', year:'1994', rad:'-' },
+        { n:112, s:'Cn', ar:'كوبرنيسيوم', en:'Copernicium', m:'[285]', c:'transition', col:'var(--col-superheavy)', row:9, col_g:12, conf:'[Rn] 5f14 6d10 7s2', state:'غاز (متوقع)', elec:'-', year:'1996', rad:'-' },
+        { n:113, s:'Nh', ar:'نيهونيوم', en:'Nihonium', m:'[286]', c:'post-trans', col:'var(--col-superheavy)', row:9, col_g:13, conf:'[Rn] 5f14 6d10 7s2 7p1', state:'غير معروف', elec:'-', year:'2003', rad:'-' },
+        { n:114, s:'Fl', ar:'فليروفيوم', en:'Flerovium', m:'[289]', c:'post-trans', col:'var(--col-superheavy)', row:9, col_g:14, conf:'[Rn] 5f14 6d10 7s2 7p2', state:'غير معروف', elec:'-', year:'1999', rad:'-' },
+        { n:115, s:'Mc', ar:'موسكوفيوم', en:'Moscovium', m:'[290]', c:'post-trans', col:'var(--col-superheavy)', row:9, col_g:15, conf:'[Rn] 5f14 6d10 7s2 7p3', state:'غير معروف', elec:'-', year:'2003', rad:'-' },
+        { n:116, s:'Lv', ar:'ليفرموريوم', en:'Livermorium', m:'[293]', c:'post-trans', col:'var(--col-superheavy)', row:9, col_g:16, conf:'[Rn] 5f14 6d10 7s2 7p4', state:'غير معروف', elec:'-', year:'2000', rad:'-' },
+        { n:117, s:'Ts', ar:'تينيسين', en:'Tennessine', m:'[294]', c:'halogen', col:'var(--col-superheavy)', row:9, col_g:17, conf:'[Rn] 5f14 6d10 7s2 7p5', state:'غير معروف', elec:'-', year:'2010', rad:'-' },
+        { n:118, s:'Og', ar:'أوغانيسون', en:'Oganesson', m:'[294]', c:'noble', col:'var(--col-superheavy)', row:9, col_g:18, conf:'[Rn] 5f14 6d10 7s2 7p6', state:'غير معروف', elec:'-', year:'2002', rad:'-' },
+        
+        // --- اللانثانيدات ---
+        { n:57, s:'La', ar:'لانثانوم', en:'Lanthanum', m:'138.91', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:4, conf:'[Xe] 5d1 6s2', state:'صلب', elec:'1.1', year:'1839', rad:'195' },
+        { n:58, s:'Ce', ar:'سيريوم', en:'Cerium', m:'140.12', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:5, conf:'[Xe] 4f1 5d1 6s2', state:'صلب', elec:'1.12', year:'1803', rad:'185' },
+        { n:59, s:'Pr', ar:'براسوديميوم', en:'Praseodymium', m:'140.91', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:6, conf:'[Xe] 4f3 6s2', state:'صلب', elec:'1.13', year:'1885', rad:'185' },
+        { n:60, s:'Nd', ar:'نيوديميوم', en:'Neodymium', m:'144.24', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:7, conf:'[Xe] 4f4 6s2', state:'صلب', elec:'1.14', year:'1885', rad:'185' },
+        { n:61, s:'Pm', ar:'بروميثيوم', en:'Promethium', m:'[145]', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:8, conf:'[Xe] 4f5 6s2', state:'صلب', elec:'1.13', year:'1945', rad:'185' },
+        { n:62, s:'Sm', ar:'ساماريوم', en:'Samarium', m:'150.36', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:9, conf:'[Xe] 4f6 6s2', state:'صلب', elec:'1.17', year:'1879', rad:'185' },
+        { n:63, s:'Eu', ar:'يوروبيوم', en:'Europium', m:'151.96', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:10, conf:'[Xe] 4f7 6s2', state:'صلب', elec:'1.2', year:'1901', rad:'185' },
+        { n:64, s:'Gd', ar:'جادولينيوم', en:'Gadolinium', m:'157.25', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:11, conf:'[Xe] 4f7 5d1 6s2', state:'صلب', elec:'1.2', year:'1880', rad:'180' },
+        { n:65, s:'Tb', ar:'تيربيوم', en:'Terbium', m:'158.93', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:12, conf:'[Xe] 4f9 6s2', state:'صلب', elec:'1.2', year:'1843', rad:'175' },
+        { n:66, s:'Dy', ar:'ديسبروسيوم', en:'Dysprosium', m:'162.50', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:13, conf:'[Xe] 4f10 6s2', state:'صلب', elec:'1.22', year:'1886', rad:'175' },
+        { n:67, s:'Ho', ar:'هولميوم', en:'Holmium', m:'164.93', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:14, conf:'[Xe] 4f11 6s2', state:'صلب', elec:'1.23', year:'1878', rad:'175' },
+        { n:68, s:'Er', ar:'إربـيوم', en:'Erbium', m:'167.26', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:15, conf:'[Xe] 4f12 6s2', state:'صلب', elec:'1.24', year:'1842', rad:'175' },
+        { n:69, s:'Tm', ar:'ثوليوم', en:'Thulium', m:'168.93', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:16, conf:'[Xe] 4f13 6s2', state:'صلب', elec:'1.25', year:'1879', rad:'175' },
+        { n:70, s:'Yb', ar:'إتيربيوم', en:'Ytterbium', m:'173.05', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:17, conf:'[Xe] 4f14 6s2', state:'صلب', elec:'1.1', year:'1878', rad:'175' },
+        { n:71, s:'Lu', ar:'لوتيشيوم', en:'Lutetium', m:'174.97', c:'lanthanide', col:'var(--col-lanthanide)', row:11, col_g:18, conf:'[Xe] 4f14 5d1 6s2', state:'صلب', elec:'1.27', year:'1907', rad:'175' },
+
+        // --- الأكتينيدات ---
+        { n:89, s:'Ac', ar:'أكتينيوم', en:'Actinium', m:'[227]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:4, conf:'[Rn] 6d1 7s2', state:'صلب', elec:'1.1', year:'1899', rad:'195' },
+        { n:90, s:'Th', ar:'ثوريوم', en:'Thorium', m:'232.04', c:'actinide', col:'var(--col-actinide)', row:12, col_g:5, conf:'[Rn] 6d2 7s2', state:'صلب', elec:'1.3', year:'1829', rad:'180' },
+        { n:91, s:'Pa', ar:'بروتكتينيوم', en:'Protactinium', m:'231.04', c:'actinide', col:'var(--col-actinide)', row:12, col_g:6, conf:'[Rn] 5f2 6d1 7s2', state:'صلب', elec:'1.5', year:'1913', rad:'180' },
+        { n:92, s:'U', ar:'يورانيوم', en:'Uranium', m:'238.03', c:'actinide', col:'var(--col-actinide)', row:12, col_g:7, conf:'[Rn] 5f3 6d1 7s2', state:'صلب', elec:'1.38', year:'1789', rad:'175' },
+        { n:93, s:'Np', ar:'نبتونيوم', en:'Neptunium', m:'[237]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:8, conf:'[Rn] 5f4 6d1 7s2', state:'صلب', elec:'1.36', year:'1940', rad:'175' },
+        { n:94, s:'Pu', ar:'بلوتونيوم', en:'Plutonium', m:'[244]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:9, conf:'[Rn] 5f6 7s2', state:'صلب', elec:'1.28', year:'1940', rad:'175' },
+        { n:95, s:'Am', ar:'أمريسيوم', en:'Americium', m:'[243]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:10, conf:'[Rn] 5f7 7s2', state:'صلب', elec:'1.13', year:'1944', rad:'175' },
+        { n:96, s:'Cm', ar:'كوريوم', en:'Curium', m:'[247]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:11, conf:'[Rn] 5f7 6d1 7s2', state:'صلب', elec:'1.28', year:'1944', rad:'170' },
+        { n:97, s:'Bk', ar:'بيركيليوم', en:'Berkelium', m:'[247]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:12, conf:'[Rn] 5f9 7s2', state:'صلب', elec:'1.3', year:'1949', rad:'170' },
+        { n:98, s:'Cf', ar:'كاليفورنيوم', en:'Californium', m:'[251]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:13, conf:'[Rn] 5f10 7s2', state:'صلب', elec:'1.3', year:'1950', rad:'170' },
+        { n:99, s:'Es', ar:'أينشتاينيوم', en:'Einsteinium', m:'[252]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:14, conf:'[Rn] 5f11 7s2', state:'صلب', elec:'1.3', year:'1952', rad:'170' },
+        { n:100, s:'Fm', ar:'فيرميوم', en:'Fermium', m:'[257]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:15, conf:'[Rn] 5f12 7s2', state:'غير معروف', elec:'1.3', year:'1952', rad:'-' },
+        { n:101, s:'Md', ar:'مندليفيوم', en:'Mendelevium', m:'[258]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:16, conf:'[Rn] 5f13 7s2', state:'غير معروف', elec:'1.3', year:'1955', rad:'-' },
+        { n:102, s:'No', ar:'نوبليوم', en:'Nobelium', m:'[259]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:17, conf:'[Rn] 5f14 7s2', state:'غير معروف', elec:'1.3', year:'1958', rad:'-' },
+        { n:103, s:'Lr', ar:'لورنسيوم', en:'Lawrencium', m:'[266]', c:'actinide', col:'var(--col-actinide)', row:12, col_g:18, conf:'[Rn] 5f14 6d1 7s2', state:'غير معروف', elec:'1.3', year:'1961', rad:'-' }
+    ];
+
+    const categoryNames = {
+        'alkali': 'فلز قلوي',
+        'alkaline': 'فلز قلوي ترابي',
+        'transition': 'فلز انتقالي',
+        'post-trans': 'فلز بعد انتقالي',
+        'metalloid': 'شبه فلز',
+        'nonmetal': 'لافلز',
+        'halogen': 'هالوجين',
+        'noble': 'غاز نبيل',
+        'lanthanide': 'لانثانيد',
+        'actinide': 'أكتينيد',
+        'superheavy': 'فائق الثقل'
+    };
+
+    const groupAxis = document.getElementById('groupAxis');
+    const periodAxis = document.getElementById('periodAxis');
+    const mainGrid = document.getElementById('mainGrid');
+    const seriesGrid = document.getElementById('seriesGrid');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const mainContainer = document.getElementById('mainContainer');
+    const closeBtn = document.getElementById('closeBtn');
+
+    // توليد ترويسة أرقام المجموعات العلوي (1 إلى 18)
+    for (let i = 1; i <= 18; i++) {
+        const numHeader = document.createElement('div');
+        numHeader.className = 'group-header-num';
+        numHeader.style.gridColumn = i;
+        numHeader.textContent = i;
+        groupAxis.appendChild(numHeader);
+    }
+
+    // توليد تصنيفات المجموعات الفرعية (IA, IIA, ... إلخ)
+    if (false) { // Legacy subgroup headings are not part of the requested reference layout.
+    const subLabels = [
+        'IA', 'IIA', 'IIIB', 'IVB', 'VB', 'VIB', 'VIIB', '', '', '', 'IB', 'IIB', 'IIIA', 'IVA', 'VA', 'VIA', 'VIIA', 'VIIIA'
+    ];
+    
+    subLabels.forEach((lbl, idx) => {
+        if(idx === 7) {
+            // عمود VIII المدمج
+            if(idx === 7) {
+                const viiiHeader = document.createElement('div');
+                viiiHeader.className = 'group-header-viii';
+                viiiHeader.textContent = 'VIII';
+                table.appendChild(viiiHeader);
+            }
+        } else if(idx > 7 && idx < 10) {
+            // تخطي المربعات المدمجة لـ VIII
+            return;
+        } else {
+            const subHeader = document.createElement('div');
+            subHeader.className = 'group-header-sub';
+            subHeader.style.gridRow = 2;
+            subHeader.style.gridColumn = idx + 1;
+            subHeader.textContent = lbl;
+            table.appendChild(subHeader);
+        }
+    });
+    }
+
+    for (let i = 1; i <= 7; i++) {
+        const periodHeader = document.createElement('div');
+        periodHeader.className = 'period-header-num';
+        periodHeader.style.gridRow = i;
+        periodHeader.textContent = i;
+        periodAxis.appendChild(periodHeader);
+    }
+
+    [
+        { row: 6, text: '57–71' },
+        { row: 7, text: '89–103' }
+    ].forEach(reference => {
+        const marker = document.createElement('div');
+        marker.className = 'series-reference';
+        marker.style.gridColumn = 3;
+        marker.style.gridRow = reference.row;
+        marker.textContent = reference.text;
+        mainGrid.appendChild(marker);
+    });
+
+    // دالة فتح النافذة المنبثقة
+    function openModal() {
+        modalOverlay.classList.add('active');
+        mainContainer.classList.add('blurred');
+    }
+
+    // دالة إغلاق النافذة المنبثقة
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        mainContainer.classList.remove('blurred');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+        if(e.target === modalOverlay) closeModal();
+    });
+
+    // بناء العناصر
+    elementsData.forEach(el => {
+        const card = document.createElement('div');
+        card.className = `element-card ${el.c}`;
+        const isSeriesElement = el.c === 'lanthanide' || el.c === 'actinide';
+        const targetGrid = isSeriesElement ? seriesGrid : mainGrid;
+        card.style.gridColumn = el.col_g;
+        card.style.gridRow = isSeriesElement ? el.row - 10 : el.row - 2;
+
+        card.setAttribute('aria-label', `${el.ar} (${el.s}) — atomic number ${el.n}, atomic mass ${el.m}`);
+        card.innerHTML = `
+            <div class="element-number">${el.n}</div>
+            <div class="element-symbol" style="color: ${el.col}">${el.s}</div>
+            <div class="element-mass">${el.m.replace(/[\[\]]/g, '')}</div>
+        `;
+
+        card.addEventListener('click', () => {
+            document.getElementById('pNumber').textContent = el.n;
+            document.getElementById('pMass').textContent = el.m;
+            document.getElementById('pSymbol').textContent = el.s;
+            document.getElementById('pSymbol').style.background = `linear-gradient(180deg, #fff, ${el.col})`;
+            document.getElementById('pSymbol').style.webkitBackgroundClip = 'text';
+            
+            document.getElementById('pNameAr').textContent = el.ar;
+            document.getElementById('pNameEn').textContent = el.en;
+            
+            const catElem = document.getElementById('pCategory');
+            catElem.textContent = categoryNames[el.c] || el.c;
+            catElem.style.background = el.col;
+            catElem.style.color = '#fff';
+
+            document.getElementById('pBox').style.borderColor = el.col;
+            document.getElementById('pBox').style.boxShadow = `inset 0 0 20px ${el.col}33`;
+
+            document.getElementById('pConfig').textContent = el.conf;
+            document.getElementById('pState').textContent = el.state;
+            document.getElementById('pElectro').textContent = el.elec;
+            document.getElementById('pYear').textContent = el.year;
+            document.getElementById('pRadius').textContent = el.rad;
+            
+            openModal();
+        });
+
+        targetGrid.appendChild(card);
+    });
+
+    // مسافات الانفصال بين الجدول الرئيسي وسلسلتي اللانثانيدات والأكتينيدات
+    if (false) { // Replaced by the detached series grids above.
+    const gaps = [
+        { r: 8, c: 3, txt: '57-71 *' },
+        { r: 9, c: 3, txt: '89-103 **' },
+        { r: 10, c: 1, txt: '' } // صف فاصل
+    ];
+
+    gaps.forEach(gap => {
+        const spacer = document.createElement('div');
+        spacer.className = 'element-card spacer';
+        spacer.style.gridRow = gap.r;
+        spacer.style.gridColumn = gap.c;
+        if(gap.txt) spacer.innerHTML = `<span style="font-size: 0.75rem">${gap.txt}</span>`;
+        if(gap.r === 10) spacer.style.gridColumn = '1 / span 18';
+        table.appendChild(spacer);
+    });
+
+    // مؤشرات السلاسل الجانبية
+    const labels = [
+        { r: 11, txt: 'Lanthanide Series *' },
+        { r: 12, txt: 'Actinide Series **' }
+    ];
+
+    labels.forEach(lb => {
+        const lblDiv = document.createElement('div');
+        lblDiv.className = 'label-row';
+        lblDiv.style.gridRow = lb.r;
+        lblDiv.textContent = lb.txt;
+        table.appendChild(lblDiv);
+    });
+    }
+
+</script>
+
+</body>
+</html>
